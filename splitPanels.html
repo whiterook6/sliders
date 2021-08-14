@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-  <title>Interactive Map</title>
+  <title>Sliders</title>
   <style>
 body, html {
   margin: 0;
@@ -78,7 +78,12 @@ body, html {
 <body>
   <div id="app"></div>
   <script>
-const splitH = (container) => {
+const splitH = (container, howMany = 2) => {
+  if (howMany > 2){
+    const [l1, r1] = splitH(container);
+    return [l1, ...splitH(r1, howMany - 1)];
+  }
+
   container.classList.add("split-h");
   const leftSide = document.createElement("div")
 
@@ -122,57 +127,62 @@ const splitH = (container) => {
   return [leftSide, rightSide];
 };
 
-  const splitV = (container) => {
-    container.classList.add("split-v");
-    const topSide = document.createElement("div")
+const splitV = (container, howMany = 2) => {
+  if (howMany > 2){
+    const [t1, b1] = splitV(container);
+    return [t1, ...splitV(container, howMany - 1)];
+  }
 
-    const divider = document.createElement("div");
-    divider.classList.add("resizer");
+  container.classList.add("split-v");
+  const topSide = document.createElement("div")
 
-    const handle = document.createElement("div");
-    handle.classList.add("handle");
-    divider.appendChild(handle);
+  const divider = document.createElement("div");
+  divider.classList.add("resizer");
 
-    const bottomSide = document.createElement("div");
-    bottomSide.style="flex-grow: 1";
+  const handle = document.createElement("div");
+  handle.classList.add("handle");
+  divider.appendChild(handle);
 
-    container.appendChild(topSide);
-    container.appendChild(divider);
-    container.appendChild(bottomSide);
+  const bottomSide = document.createElement("div");
 
-    divider.addEventListener("mousedown", (event) => {
-      if (event.button != 0) {
-        return;
-      }
-      let mouseY = event.clientY;
-      const mouseStartY = event.clientY;
-      let topHeight = topSide.getBoundingClientRect().height;
-      divider.classList.add("active");
+  container.appendChild(topSide);
+  container.appendChild(divider);
+  container.appendChild(bottomSide);
 
-      const mouseMoveHandler = (event) => {
-        const dY = event.clientY - mouseStartY;
-        topSide.style.height = `${Math.max(topHeight + dY, 20)}px`;
-      };
+  divider.addEventListener("mousedown", (event) => {
+    if (event.button != 0) {
+      return;
+    }
+    let mouseY = event.clientY;
+    const mouseStartY = event.clientY;
+    let topHeight = topSide.getBoundingClientRect().height;
+    divider.classList.add("active");
 
-      const mouseUpHandler = (event) => {
-        divider.classList.remove("active");
-        document.removeEventListener("mousemove", mouseMoveHandler);
-        document.removeEventListener("mouseup", mouseUpHandler);
-      };
-      document.addEventListener("mousemove", mouseMoveHandler);
-      document.addEventListener("mouseup", mouseUpHandler);
-    });
+    const mouseMoveHandler = (event) => {
+      const dY = event.clientY - mouseStartY;
+      topSide.style.height = `${Math.max(topHeight + dY, 20)}px`;
+    };
 
-    return [topSide, bottomSide];
-  };
+    const mouseUpHandler = (event) => {
+      divider.classList.remove("active");
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  });
+
+  return [topSide, bottomSide];
+};
 
 const app = document.getElementById("app");
-const [left, right] = splitH(app);
-left.innerText = "Left Side";
-
-const [topRight, bottomRight] = splitV(right);
-topRight.innerText = "Top Right";
-bottomRight.innerText = "Bottom Right";
+const [l1, m1, r1] = splitH(app, 3);
+const [mt, m, mb] = splitV(m1, 3);
+l1.innerText = "Left";
+mt.innerText = "top";
+m.innerText = "middle";
+mb.innerText = "bottom";
+r1.innerText = "right";
   </script>
 </body>
 </html>
