@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+  <title>Interactive Map</title>
+  <style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+* {
+  box-sizing: border-box;
+}
+.split-v {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
+}
+.split-h {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+.split-v > .resizer, .split-h > .resizer {
+  align-items: center;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-basis: 10px;
+  justify-content: center;
+}
+.split-v > .resizer {
+  cursor: ns-resize;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 10px;
+}
+.split-h > .resizer {
+  cursor: ew-resize;
+  flex-direction: row;
+  flex-shrink: 0;
+  width: 10px;
+}
+
+.resizer > .handle {
+  border-radius: 2px;
+  background-color: #e0e0e0;
+}
+
+.split-v > .resizer > .handle {
+  width: 20px;
+  height: 4px;
+}
+
+.split-h > .resizer > .handle {
+  width: 4px;
+  height: 20px;
+}
+
+.split-v > .resizer:hover  .handle,
+.split-v > .resizer.active .handle,
+.split-h > .resizer:hover  .handle,
+.split-h > .resizer.active .handle{
+  background-color: #3367d6;
+}
+
+.split-h > .resizer.active, .split-v .resizer.active {
+  background-color: #cccccc;
+}
+
+  </style>
+</head>
+<body>
+  <div class="split-v">
+    <div class="split-h" style="min-height: 100px;">
+      <div style="min-width: 100px";>Top Left</div>
+      <div class="resizer">
+        <div class="handle"></div>
+      </div>
+      <div>Top Right</div>
+    </div>
+    <div class="resizer">
+      <div class="handle"></div>
+    </div>
+    <div class="split-h" style="min-height: 100px;">
+      <div style="min-width: 100px";>Bottom Left</div>
+      <div class="resizer">
+        <div class="handle"></div>
+      </div>
+      <div style="min-width: 100px";>Bottom Right</div>
+    </div>
+  </div>
+  <script>
+const vResizers = document.querySelectorAll(".split-v > .resizer");
+for (let i = 0; i < vResizers.length; i++){
+  const vResizer = vResizers[i];
+  const topSide = vResizer.previousElementSibling;
+  const bottomSide = vResizer.nextElementSibling;
+  if (!topSide){
+    console.error("No Top Side");
+    continue;
+  } else if (!bottomSide){
+    console.error("No bottom side");
+    continue;
+  }
+  bottomSide.style["flex-grow"] = 1;
+  
+  vResizer.addEventListener("mousedown", (event) => {
+    if (event.button != 0){
+      return;
+    }
+    let mouseY = event.clientY;
+    const mouseStartY = event.clientY;
+    let topHeight = topSide.getBoundingClientRect().height;
+    vResizer.classList.add("active");
+
+    const mouseMoveHandler = (event) => {
+      const dY = event.clientY - mouseStartY;
+      topSide.style.height = `${Math.max(topHeight + dY, 20)}px`;
+    };
+
+    const mouseUpHandler = (event) => {
+      vResizer.classList.remove("active");
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  });
+}
+
+const hResizers = document.querySelectorAll(".split-h > .resizer");
+for (let i = 0; i < hResizers.length; i++) {
+  const hResizer = hResizers[i];
+  const leftSide = hResizer.previousElementSibling;
+  const rightSide = hResizer.nextElementSibling;
+  if (!leftSide) {
+    console.error("No left Side");
+    continue;
+  } else if (!rightSide) {
+    console.error("No right side");
+    continue;
+  }
+  
+  hResizer.addEventListener("mousedown", (event) => {
+    if (event.button != 0) {
+      return;
+    }
+    let mouseX = event.clientX;
+    const mouseStartX = event.clientX;
+    let leftWidth = leftSide.getBoundingClientRect().width;
+    hResizer.classList.add("active");
+
+    const mouseMoveHandler = (event) => {
+      const dX = event.clientX - mouseStartX;
+      leftSide.style.width = `${Math.max(leftWidth + dX, 20)}px`;
+    };
+
+    const mouseUpHandler = (event) => {
+      hResizer.classList.remove("active");
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  });
+}
+  </script>
+</body>
+</html>
