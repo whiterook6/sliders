@@ -25,6 +25,7 @@ body, html {
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  height: 100%;
 }
 .split-v > .resizer, .split-h > .resizer {
   align-items: center;
@@ -75,85 +76,34 @@ body, html {
   </style>
 </head>
 <body>
-  <div class="split-v">
-    <div class="split-h" style="min-height: 100px;">
-      <div style="min-width: 100px";>Top Left</div>
-      <div class="resizer">
-        <div class="handle"></div>
-      </div>
-      <div>Top Right</div>
-    </div>
-    <div class="resizer">
-      <div class="handle"></div>
-    </div>
-    <div class="split-h" style="min-height: 100px;">
-      <div style="min-width: 100px";>Bottom Left</div>
-      <div class="resizer">
-        <div class="handle"></div>
-      </div>
-      <div style="min-width: 100px";>Bottom Right</div>
-    </div>
-  </div>
+  <div id="app"></div>
   <script>
-const vResizers = document.querySelectorAll(".split-v > .resizer");
-for (let i = 0; i < vResizers.length; i++){
-  const vResizer = vResizers[i];
-  const topSide = vResizer.previousElementSibling;
-  const bottomSide = vResizer.nextElementSibling;
-  if (!topSide){
-    console.error("No Top Side");
-    continue;
-  } else if (!bottomSide){
-    console.error("No bottom side");
-    continue;
-  }
-  bottomSide.style["flex-grow"] = 1;
+const splitH = (container) => {
+  container.classList.add("split-h");
+  const leftSide = document.createElement("div")
+
+  const divider = document.createElement("div");
+  divider.classList.add("resizer");
   
-  vResizer.addEventListener("mousedown", (event) => {
-    if (event.button != 0){
-      return;
-    }
-    let mouseY = event.clientY;
-    const mouseStartY = event.clientY;
-    let topHeight = topSide.getBoundingClientRect().height;
-    vResizer.classList.add("active");
-
-    const mouseMoveHandler = (event) => {
-      const dY = event.clientY - mouseStartY;
-      topSide.style.height = `${Math.max(topHeight + dY, 20)}px`;
-    };
-
-    const mouseUpHandler = (event) => {
-      vResizer.classList.remove("active");
-      document.removeEventListener("mousemove", mouseMoveHandler);
-      document.removeEventListener("mouseup", mouseUpHandler);
-    };
-    document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("mouseup", mouseUpHandler);
-  });
-}
-
-const hResizers = document.querySelectorAll(".split-h > .resizer");
-for (let i = 0; i < hResizers.length; i++) {
-  const hResizer = hResizers[i];
-  const leftSide = hResizer.previousElementSibling;
-  const rightSide = hResizer.nextElementSibling;
-  if (!leftSide) {
-    console.error("No left Side");
-    continue;
-  } else if (!rightSide) {
-    console.error("No right side");
-    continue;
-  }
+  const handle = document.createElement("div");
+  handle.classList.add("handle");
+  divider.appendChild(handle);
   
-  hResizer.addEventListener("mousedown", (event) => {
+  const rightSide = document.createElement("div");
+  rightSide.style = "flex-grow: 1";
+
+  container.appendChild(leftSide);
+  container.appendChild(divider);
+  container.appendChild(rightSide);
+
+  divider.addEventListener("mousedown", (event) => {
     if (event.button != 0) {
       return;
     }
     let mouseX = event.clientX;
     const mouseStartX = event.clientX;
     let leftWidth = leftSide.getBoundingClientRect().width;
-    hResizer.classList.add("active");
+    divider.classList.add("active");
 
     const mouseMoveHandler = (event) => {
       const dX = event.clientX - mouseStartX;
@@ -161,14 +111,68 @@ for (let i = 0; i < hResizers.length; i++) {
     };
 
     const mouseUpHandler = (event) => {
-      hResizer.classList.remove("active");
+      divider.classList.remove("active");
       document.removeEventListener("mousemove", mouseMoveHandler);
       document.removeEventListener("mouseup", mouseUpHandler);
     };
     document.addEventListener("mousemove", mouseMoveHandler);
     document.addEventListener("mouseup", mouseUpHandler);
   });
-}
+
+  return [leftSide, rightSide];
+};
+
+  const splitV = (container) => {
+    container.classList.add("split-v");
+    const topSide = document.createElement("div")
+
+    const divider = document.createElement("div");
+    divider.classList.add("resizer");
+
+    const handle = document.createElement("div");
+    handle.classList.add("handle");
+    divider.appendChild(handle);
+
+    const bottomSide = document.createElement("div");
+    bottomSide.style="flex-grow: 1";
+
+    container.appendChild(topSide);
+    container.appendChild(divider);
+    container.appendChild(bottomSide);
+
+    divider.addEventListener("mousedown", (event) => {
+      if (event.button != 0) {
+        return;
+      }
+      let mouseY = event.clientY;
+      const mouseStartY = event.clientY;
+      let topHeight = topSide.getBoundingClientRect().height;
+      divider.classList.add("active");
+
+      const mouseMoveHandler = (event) => {
+        const dY = event.clientY - mouseStartY;
+        topSide.style.height = `${Math.max(topHeight + dY, 20)}px`;
+      };
+
+      const mouseUpHandler = (event) => {
+        divider.classList.remove("active");
+        document.removeEventListener("mousemove", mouseMoveHandler);
+        document.removeEventListener("mouseup", mouseUpHandler);
+      };
+      document.addEventListener("mousemove", mouseMoveHandler);
+      document.addEventListener("mouseup", mouseUpHandler);
+    });
+
+    return [topSide, bottomSide];
+  };
+
+const app = document.getElementById("app");
+const [left, right] = splitH(app);
+left.innerText = "Left Side";
+
+const [topRight, bottomRight] = splitV(right);
+topRight.innerText = "Top Right";
+bottomRight.innerText = "Bottom Right";
   </script>
 </body>
 </html>
