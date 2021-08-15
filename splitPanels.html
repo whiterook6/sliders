@@ -78,14 +78,14 @@ body, html {
 <body>
   <div id="app"></div>
   <script>
-const splitH = (container, howMany = 2) => {
-  if (howMany > 2){
-    const [l1, r1] = splitH(container);
-    return [l1, ...splitH(r1, howMany - 1)];
+const splitH = (container, columnCount = 2) => {
+  if (columnCount && columnCount > 2){
+    const [l1, r1] = splitH(container, 2);
+    return [...splitH(l1, columnCount - 1), r1];
   }
 
   container.classList.add("split-h");
-  const leftSide = document.createElement("div")
+  const leftSide = document.createElement("div");
 
   const divider = document.createElement("div");
   divider.classList.add("resizer");
@@ -127,14 +127,14 @@ const splitH = (container, howMany = 2) => {
   return [leftSide, rightSide];
 };
 
-const splitV = (container, howMany = 2) => {
-  if (howMany > 2){
+const splitV = (container, rowCount = 2) => {
+  if (rowCount > 2){
     const [t1, b1] = splitV(container);
-    return [t1, ...splitV(container, howMany - 1)];
+    return [...splitV(t1, rowCount - 1), b1];
   }
 
   container.classList.add("split-v");
-  const topSide = document.createElement("div")
+  const topSide = document.createElement("div");
 
   const divider = document.createElement("div");
   divider.classList.add("resizer");
@@ -144,6 +144,7 @@ const splitV = (container, howMany = 2) => {
   divider.appendChild(handle);
 
   const bottomSide = document.createElement("div");
+  bottomSide.style = "flex-grow: 1";
 
   container.appendChild(topSide);
   container.appendChild(divider);
@@ -179,10 +180,15 @@ const app = document.getElementById("app");
 const [l1, m1, r1] = splitH(app, 3);
 const [mt, m, mb] = splitV(m1, 3);
 l1.innerText = "Left";
+l1.style.width = "250px";
 mt.innerText = "top";
+mt.style.height = "48px";
 m.innerText = "middle";
 mb.innerText = "bottom";
+mb.style.height = "48px";
 r1.innerText = "right";
+r1.style.width = "250px";
+
   </script>
 </body>
 </html>
