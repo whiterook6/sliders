@@ -78,20 +78,20 @@ body, html {
 <body>
   <div id="app"></div>
   <script>
-const splitH = (container, columnCount = 2) => {
-  if (columnCount && columnCount > 2){
-    const [l1, r1] = splitH(container, 2);
-    return [...splitH(l1, columnCount - 1), r1];
-  }
-
+// splits horizontally, and controls the left width
+const splitLeft = (container, width = undefined) => {
   container.classList.add("split-h");
+
   const leftSide = document.createElement("div");
+  if (width !== undefined){
+    leftSide.style.width = width;
+  }
 
   const divider = document.createElement("div");
   divider.classList.add("resizer");
-  
   const handle = document.createElement("div");
   handle.classList.add("handle");
+
   divider.appendChild(handle);
   
   const rightSide = document.createElement("div");
@@ -127,14 +127,61 @@ const splitH = (container, columnCount = 2) => {
   return [leftSide, rightSide];
 };
 
-const splitV = (container, rowCount = 2) => {
-  if (rowCount > 2){
-    const [t1, b1] = splitV(container);
-    return [...splitV(t1, rowCount - 1), b1];
+// splits horizontally, and controls the right width
+const splitRight = (container, width = undefined) => {
+  container.classList.add("split-h");
+
+  const leftSide = document.createElement("div");
+  leftSide.style = "flex-grow: 1";
+
+  const divider = document.createElement("div");
+  divider.classList.add("resizer");
+  const handle = document.createElement("div");
+  handle.classList.add("handle");
+  divider.appendChild(handle);
+
+  const rightSide = document.createElement("div");
+  if (width !== undefined){
+    rightSide.style.width = width;
   }
 
+  container.appendChild(leftSide);
+  container.appendChild(divider);
+  container.appendChild(rightSide);
+
+  divider.addEventListener("mousedown", (event) => {
+    if (event.button != 0) {
+      return;
+    }
+    let mouseX = event.clientX;
+    const mouseStartX = event.clientX;
+    let rightWidth = rightSide.getBoundingClientRect().width;
+    divider.classList.add("active");
+
+    const mouseMoveHandler = (event) => {
+      const dX = event.clientX - mouseStartX;
+      rightSide.style.width = `${Math.max(rightWidth - dX, 20)}px`;
+    };
+
+    const mouseUpHandler = (event) => {
+      divider.classList.remove("active");
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  });
+
+  return [leftSide, rightSide];
+};
+
+// splits vertically, and controls the top height
+const splitUp = (container, height = undefined) => {
   container.classList.add("split-v");
   const topSide = document.createElement("div");
+  if (height !== undefined){
+    topSide.style.height = height;
+  }
 
   const divider = document.createElement("div");
   divider.classList.add("resizer");
@@ -176,18 +223,68 @@ const splitV = (container, rowCount = 2) => {
   return [topSide, bottomSide];
 };
 
+// splits vertically, and controls the bottom height
+const splitDown = (container, height = undefined) => {
+  container.classList.add("split-v");
+  const topSide = document.createElement("div");
+  topSide.style = "flex-grow: 1";
+
+
+  const divider = document.createElement("div");
+  divider.classList.add("resizer");
+
+  const handle = document.createElement("div");
+  handle.classList.add("handle");
+  divider.appendChild(handle);
+
+  const bottomSide = document.createElement("div");
+  if (height !== undefined){
+    bottomSide.style.height = height;
+  }
+
+  container.appendChild(topSide);
+  container.appendChild(divider);
+  container.appendChild(bottomSide);
+
+  divider.addEventListener("mousedown", (event) => {
+    if (event.button != 0) {
+      return;
+    }
+    let mouseY = event.clientY;
+    const mouseStartY = event.clientY;
+    let bottomHeight = topSide.getBoundingClientRect().height;
+    divider.classList.add("active");
+
+    const mouseMoveHandler = (event) => {
+      const dY = event.clientY - mouseStartY;
+      bottomSide.style.height = `${Math.max(bottomHeight - dY, 20)}px`;
+    };
+
+    const mouseUpHandler = (event) => {
+      divider.classList.remove("active");
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  });
+
+  return [topSide, bottomSide];
+};
+
 const app = document.getElementById("app");
-const [l1, m1, r1] = splitH(app, 3);
-const [mt, m, mb] = splitV(m1, 3);
-l1.innerText = "Left";
-l1.style.width = "250px";
-mt.innerText = "top";
-mt.style.height = "48px";
-m.innerText = "middle";
-mb.innerText = "bottom";
-mb.style.height = "48px";
-r1.innerText = "right";
-r1.style.width = "250px";
+// const [m1, right] = splitRight(app, "400px");
+// const [left, middle] = splitLeft(m1, "400px");
+const [left, m1] = splitLeft(app, "400px");
+const [m2, right] = splitRight(m1, "400px");
+left.innerText = "left";
+right.innerText = "right";
+
+const [topSide, m3] = splitUp(m2, "64px");
+const [middle, bottom] = splitDown(m3, "64px");
+topSide.innerText = "top";
+middle.innerText = "middle";
+bottom.innerText = "bottom";
 
   </script>
 </body>
